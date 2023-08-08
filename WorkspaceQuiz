@@ -1,0 +1,113 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class QuizApp extends JFrame {
+    private JLabel questionLabel;
+    private JRadioButton[] answerOptions;
+    private JButton submitButton;
+
+    private int currentQuestionIndex = 0;
+    private int score = 0;
+
+    private Question[] questions = {
+        new Question("What is the capital of France?", new String[]{"Paris", "Berlin", "London"}, 0),
+        // Add more questions here
+    };
+
+    public QuizApp() {
+        setTitle("Simple Quiz App");
+        setSize(400, 300);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        setLayout(new BorderLayout());
+
+        questionLabel = new JLabel(questions[currentQuestionIndex].getQuestion());
+        add(questionLabel, BorderLayout.NORTH);
+
+        ButtonGroup group = new ButtonGroup();
+        answerOptions = new JRadioButton[questions[currentQuestionIndex].getAnswerOptions().length];
+        JPanel optionsPanel = new JPanel(new GridLayout(0, 1));
+        for (int i = 0; i < answerOptions.length; i++) {
+            answerOptions[i] = new JRadioButton(questions[currentQuestionIndex].getAnswerOptions()[i]);
+            group.add(answerOptions[i]);
+            optionsPanel.add(answerOptions[i]);
+        }
+        add(optionsPanel, BorderLayout.CENTER);
+
+        submitButton = new JButton("Submit");
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedAnswer = -1;
+                for (int i = 0; i < answerOptions.length; i++) {
+                    if (answerOptions[i].isSelected()) {
+                        selectedAnswer = i;
+                        break;
+                    }
+                }
+                if (selectedAnswer == questions[currentQuestionIndex].getCorrectAnswerIndex()) {
+                    score++;
+                }
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    updateQuestion();
+                } else {
+                    showResults();
+                }
+            }
+        });
+        add(submitButton, BorderLayout.SOUTH);
+
+        updateQuestion();
+    }
+
+    private void updateQuestion() {
+        questionLabel.setText(questions[currentQuestionIndex].getQuestion());
+        String[] options = questions[currentQuestionIndex].getAnswerOptions();
+        for (int i = 0; i < options.length; i++) {
+            answerOptions[i].setText(options[i]);
+            answerOptions[i].setSelected(false);
+        }
+    }
+
+    private void showResults() {
+        JOptionPane.showMessageDialog(this, "Your score: " + score + " out of " + questions.length);
+        System.exit(0);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new QuizApp().setVisible(true);
+            }
+        });
+    }
+}
+
+class Question {
+    private String question;
+    private String[] answerOptions;
+    private int correctAnswerIndex;
+
+    public Question(String question, String[] answerOptions, int correctAnswerIndex) {
+        this.question = question;
+        this.answerOptions = answerOptions;
+        this.correctAnswerIndex = correctAnswerIndex;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public String[] getAnswerOptions() {
+        return answerOptions;
+    }
+
+    public int getCorrectAnswerIndex() {
+        return correctAnswerIndex;
+    }
+}
